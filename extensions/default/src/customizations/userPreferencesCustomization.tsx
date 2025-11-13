@@ -74,19 +74,29 @@ function UserPreferencesModalDefault({ hide }: { hide: () => void }) {
               <SelectValue placeholder={t('Select language')} />
             </SelectTrigger>
             <SelectContent>
-              {availableLanguages.map(lang => (
+              {/* {availableLanguages.map(lang => (
                 <SelectItem
                   key={lang.value}
                   value={lang.value}
                 >
                   {lang.label}
                 </SelectItem>
-              ))}
+              ))} */}
+              {availableLanguages
+                  .filter(lang => lang.value === 'en-US' || lang.value === 'tr-TR')
+                  .map(lang => (
+                    <SelectItem
+                      key={lang.value}
+                      value={lang.value}
+                    >
+                      {lang.label}
+                    </SelectItem>
+                  ))}
             </SelectContent>
           </Select>
         </div>
 
-        <UserPreferencesModal.SubHeading>{t('Hotkeys')}</UserPreferencesModal.SubHeading>
+        {/* <UserPreferencesModal.SubHeading>{t('Hotkeys')}</UserPreferencesModal.SubHeading>
         <UserPreferencesModal.HotkeysGrid>
           {Object.entries(state.hotkeyDefinitions).map(([id, definition]) => (
             <UserPreferencesModal.Hotkey
@@ -98,14 +108,14 @@ function UserPreferencesModalDefault({ hide }: { hide: () => void }) {
               hotkeys={hotkeysModule}
             />
           ))}
-        </UserPreferencesModal.HotkeysGrid>
+        </UserPreferencesModal.HotkeysGrid> */}
       </UserPreferencesModal.Body>
       <FooterAction>
-        <FooterAction.Left>
+        {/* <FooterAction.Left>
           <FooterAction.Auxiliary onClick={onResetHandler}>
             {t('Reset to defaults')}
           </FooterAction.Auxiliary>
-        </FooterAction.Left>
+        </FooterAction.Left> */}
         <FooterAction.Right>
           <FooterAction.Secondary
             onClick={() => {

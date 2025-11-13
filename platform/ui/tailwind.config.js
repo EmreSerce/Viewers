@@ -29,11 +29,27 @@ module.exports = {
       },
 
       primary: {
-        light: '#5acce6',
-        main: '#0944b3',
-        dark: '#090c29',
-        active: '#348cfd',
+        light: '#5acce6', // turkuaz
+        main: '#0944b3', // ana mavi ton
+        dark: '#090c29', // lacivert - siyah arası
+        active: '#348cfd', // canlı mavi
       },
+
+      // primary: {
+      //   light: '#5acce6', // turkuaz
+      //   main: '#0944b3', // ana mavi ton
+      //   dark: '#090c29', // lacivert - siyah arası
+      //   active: '#348cfd', // canlı mavi
+      // },
+
+      // primary: {
+      //   light: '#f88c5a',   // Daha açık turuncu
+      //   main:  '#f2632b',   // ana turuncu
+      //   dark:  '#b23e11',   // Daha koyu turuncu/kiremit tonu
+      //   dark:'#ffffff',   // Aktif durumlar için canlı turuncu
+      //   active:'#ff7b3d',   // Aktif durumlar için canlı turuncu
+      // },
+
       inputfield: {
         main: '#3a3f99',
         disabled: '#2b166b',

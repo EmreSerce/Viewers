@@ -1,10 +1,25 @@
 {
-  "AccessionNumber": "Accession #",
+  "ClearFilters": "Filtre Temizle",
   "Empty": "Boş",
-  "MRN": "MRN",
-  "Modality": "Modalite",
+  "Filter list to 100 studies or less to enable sorting": "Sıralamayı etkinleştirmek için listeyi 100 veya daha az çalışmaya filtreleyin",
+  "Next": "İleri >",
+  "No studies available": "Çalışma bulunamadı",
+  "Number of studies": "Çalışma Sayısı",
+  "Page": "Sayfa",
+  "Previous": "< Geri",
+  "Results per page": "Sayfa başına sonuçlar",
+  "StudyList": "Çalışma Listesi",
+  "Upload": "Upload",
+
   "PatientName": "Hasta Adı",
+  "MRN": "Hasta No (MRN)",
   "StudyDate": "Çalışma Zamanı",
   "Description": "Açıklama",
-  "StudyList": "Çalışma Listesi"
+  "Modality": "Modalite",
+  "TriageStatus": "Öncelik durumu",
+  "Progression": "İlerleme",
+  "AccessionNumber": "Accession #",
+  "Instances": "Görüntü Sayısı",
+  "Load File": "Dosya(lar) Yükle",
+  "Load Folder": "Klasör Yükle"
 }

@@ -72,7 +72,8 @@ function Header({
             >
               {isReturnEnabled && <Icons.ArrowLeft className="text-primary ml-1 h-7 w-7" />}
               <div className="ml-1">
-                {WhiteLabeling?.createLogoComponentFn?.(React, props) || <Icons.OHIFLogo />}
+                {/* {WhiteLabeling?.createLogoComponentFn?.(React, props) || <Icons.OHIFLogo />} */}
+                <img src="/assets/Logo_Yan.png" alt="Logo" style={{ height: 32 }} />
               </div>
             </div>
           </div>
@@ -85,40 +86,17 @@ function Header({
             <div className="border-primary-dark mx-1.5 h-[25px] border-r"></div>
             {PatientInfo}
             <div className="border-primary-dark mx-1.5 h-[25px] border-r"></div>
-            <div className="flex-shrink-0">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="text-primary hover:bg-primary-dark mt-2 h-full w-full"
-                  >
-                    <Icons.GearSettings />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  {menuOptions.map((option, index) => {
-                    const IconComponent = option.icon
-                      ? Icons[option.icon as keyof typeof Icons]
-                      : null;
-                    return (
-                      <DropdownMenuItem
-                        key={index}
-                        onSelect={option.onClick}
-                        className="flex items-center gap-2 py-2"
-                      >
-                        {IconComponent && (
-                          <span className="flex h-4 w-4 items-center justify-center">
-                            <Icons.ByName name={IconComponent.name} />
-                          </span>
-                        )}
-                        <span className="flex-1">{option.title}</span>
-                      </DropdownMenuItem>
-                    );
-                  })}
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
+            {/* PACS yönlendirme butonu */}
+            <Button
+              variant="ghost"
+              size="sm"
+              className="ml-2 flex items-center"
+              onClick={() => window.open('http://localhost:8080/dcm4chee-arc/ui2', '_blank')}
+              title="PACS (dcm4chee)"
+            >
+              <Icons.Link className="mr-1 h-5 w-5" />
+              PACS
+            </Button>
           </div>
         </div>
       </NavBar>

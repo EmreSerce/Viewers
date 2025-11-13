@@ -5,6 +5,7 @@ import { useDrag } from 'react-dnd';
 import { Icons } from '../Icons';
 import { DisplaySetMessageListTooltip } from '../DisplaySetMessageListTooltip';
 import { TooltipTrigger, TooltipContent, Tooltip } from '../Tooltip';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose } from '../Dialog';
 
 /**
  * Display a thumbnail for a display set.
@@ -46,6 +47,14 @@ const Thumbnail = ({
   });
 
   const [lastTap, setLastTap] = useState(0);
+  const [isModalOpen, setModalOpen] = useState(false);
+  const [densityCorrect, setDensityCorrect] = useState('');
+  const [densityValue, setDensityValue] = useState(''); // A, B, C, D
+  const [biradsCorrect, setBiradsCorrect] = useState('');
+  const [biradsValue, setBiradsValue] = useState(''); // 1, 2, 3
+  const [annotationCorrect, setAnnotationCorrect] = useState('');
+  const [date, setDate] = useState('');
+  const [note, setNote] = useState('');
 
   const handleTouchEnd = e => {
     const currentTime = new Date().getTime();
@@ -56,6 +65,22 @@ const Thumbnail = ({
       onClick(e);
     }
     setLastTap(currentTime);
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    // Burada verileri backend'e gönderebilirsin
+    console.log({
+      densityCorrect,
+      densityValue,
+      biradsCorrect,
+      biradsValue,
+      annotationCorrect,
+      date,
+      note,
+      displaySetInstanceUID,
+    });
+    setModalOpen(false);
   };
 
   const renderThumbnailPreset = () => {
@@ -157,6 +182,161 @@ const Thumbnail = ({
               </div>
             </div>
           </div>
+          {/* Bilgi Ekle butonu - instance kartının en altı */}
+          {/*
+          <button
+            className="mt-2 w-full rounded bg-primary text-white py-1 text-xs hover:bg-primary-dark transition"
+            onClick={e => {
+              e.stopPropagation();
+              setModalOpen(true);
+            }}
+          >
+            Geri Bildirim Ekle
+          </button>
+          */}
+          {/* Modal Form */}
+          <Dialog open={isModalOpen} onOpenChange={setModalOpen}>
+            <DialogContent>
+              {/* Header */}
+              <div className="flex items-center justify-between mb-4">
+                <img src="/assets/logo.png" className="h-8" />
+                <h2 className="text-xl font-extrabold" style={{ color: '#e53935' }}>RATIONE DIVIDE AI Geri Bildirim Formu</h2>
+                <img src="/assets/Tübitak_Logo.png" className="h-16" />
+              </div>
+              <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+                {/* Soru 1 */}
+                <label className="font-semibold text-white">
+                  Kompozisyon (Breast Density) Bilgisi Doğru mu?
+                  <div>
+                    <input
+                      type="radio"
+                      name="densityCorrect"
+                      value="yes"
+                      checked={densityCorrect === 'yes'}
+                      onChange={() => setDensityCorrect('yes')}
+                    /> Evet
+                    <input
+                      type="radio"
+                      name="densityCorrect"
+                      value="no"
+                      checked={densityCorrect === 'no'}
+                      onChange={() => setDensityCorrect('no')}
+                    /> Hayır
+                  </div>
+                  {densityCorrect === 'no' && (
+                    <div className="flex flex-col gap-1 mt-2">
+                      <span className="text-sm">Doğru Kompozisyon:</span>
+                      <div className="flex gap-2">
+                        {['A', 'B', 'C', 'D'].map(opt => (
+                          <button
+                            key={opt}
+                            type="button"
+                            onClick={() => setDensityValue(opt)}
+                            className={`px-4 py-1 rounded-full border transition font-semibold ${densityValue === opt ? 'bg-blue-800 text-white' : 'bg-white text-blue-800 border-blue-800'}`}
+                          >
+                            {opt}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </label>
+                {/* Soru 2 */}
+                <label className="font-semibold text-white">
+                  BI-RADS Bilgisi Doğru mu?
+                  <div>
+                    <input
+                      type="radio"
+                      name="biradsCorrect"
+                      value="yes"
+                      checked={biradsCorrect === 'yes'}
+                      onChange={() => setBiradsCorrect('yes')}
+                    /> Evet
+                    <input
+                      type="radio"
+                      name="biradsCorrect"
+                      value="no"
+                      checked={biradsCorrect === 'no'}
+                      onChange={() => setBiradsCorrect('no')}
+                    /> Hayır
+                  </div>
+                  {biradsCorrect === 'no' && (
+                    <div className="flex flex-col gap-1 mt-2">
+                      <span className="text-sm">Doğru BI-RADS:</span>
+                      <div className="flex gap-2">
+                        {[
+                          { value: '1', label: 'BI-RADS 1' },
+                          { value: '2', label: 'BI-RADS 2' },
+                          { value: '3', label: 'BI-RADS 4-5' },
+                        ].map(opt => (
+                          <button
+                            key={opt.value}
+                            type="button"
+                            onClick={() => setBiradsValue(opt.value)}
+                            className={`px-4 py-1 rounded-full border transition font-semibold ${biradsValue === opt.value ? 'bg-blue-800 text-white' : 'bg-white text-blue-800 border-blue-800'}`}
+                          >
+                            {opt.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </label>
+                {/* Soru 3 */}
+                <label className="font-semibold text-white">
+                  Anotasyon Bilgisi Doğru mu?
+                  <div>
+                    <input
+                      type="radio"
+                      name="annotationCorrect"
+                      value="yes"
+                      checked={annotationCorrect === 'yes'}
+                      onChange={() => setAnnotationCorrect('yes')}
+                    /> Evet
+                    <input
+                      type="radio"
+                      name="annotationCorrect"
+                      value="no"
+                      checked={annotationCorrect === 'no'}
+                      onChange={() => setAnnotationCorrect('no')}
+                    /> Hayır
+                  </div>
+                  {annotationCorrect === 'no' && (
+                    <div className="text-xs mt-1 text-white">
+                      Anotasyonları gerçekleştirerek csv olarak gönderin
+                    </div>
+                  )}
+                </label>
+                {/* Footer */}
+                <label className="font-semibold text-white">
+                  İşlem Tarihi:
+                  <input
+                    type="date"
+                    value={date}
+                    onChange={e => setDate(e.target.value)}
+                    className="rounded border px-2 py-1"
+                    style={{ color: 'black', background: 'white' }}
+                  />
+                </label>
+                {/* Footer */}
+                <div className="flex items-center font-semibold text-white mb-1">
+                  <label htmlFor="note" className="mr-2 whitespace-nowrap">Not:</label>
+                  <textarea
+                    id="note"
+                    value={note}
+                    onChange={e => setNote(e.target.value)}
+                    className="rounded border px-2 py-1 flex-1"
+                    style={{ color: 'black', background: 'white' }}
+                    placeholder="Ekstra göndermek istediğiniz..."
+                  />
+                </div>
+                <DialogFooter>
+                  <button type="button" onClick={() => setModalOpen(false)} className="bg-blue-800 text-white px-4 py-2 rounded mr-2">İptal</button>
+                  <button type="submit" className="bg-blue-800 text-white px-4 py-2 rounded">Kaydet</button>
+                </DialogFooter>
+              </form>
+            </DialogContent>
+          </Dialog>
         </div>
       </div>
     );

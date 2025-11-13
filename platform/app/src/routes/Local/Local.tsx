@@ -9,6 +9,7 @@ import filesToStudies from './filesToStudies';
 import { extensionManager } from '../../App';
 
 import { Button, Icons } from '@ohif/ui-next';
+import { useTranslation } from 'react-i18next';
 
 const getLoadButton = (onDrop, text, isDir) => {
   return (
@@ -55,6 +56,7 @@ function Local({ modePath }: LocalProps) {
   const navigate = useNavigate();
   const dropzoneRef = useRef();
   const [dropInitiated, setDropInitiated] = React.useState(false);
+  const { t } = useTranslation();
 
   const LoadingIndicatorProgress = customizationService.getCustomization(
     'ui.loadingIndicatorProgress'
@@ -155,8 +157,8 @@ function Local({ modePath }: LocalProps) {
                 )}
               </div>
               <div className="flex justify-center gap-2 pt-4">
-                {getLoadButton(onDrop, 'Load files', false)}
-                {getLoadButton(onDrop, 'Load folders', true)}
+                {getLoadButton(onDrop, t('Load File'), false)}
+                {getLoadButton(onDrop, t('Load Folder'), true)}
               </div>
             </div>
           </div>

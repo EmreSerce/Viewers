@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import classnames from 'classnames';
 import PropTypes from 'prop-types';
 import { Link, useNavigate } from 'react-router-dom';
@@ -10,7 +10,7 @@ import { useTranslation } from 'react-i18next';
 import filtersMeta from './filtersMeta.js';
 import { useAppConfig } from '@state';
 import { useDebounce, useSearchParams } from '../../hooks';
-import { utils, Types as coreTypes } from '@ohif/core';
+import { utils, Types as coreTypes, MODULE_TYPES } from '@ohif/core';
 
 import {
   StudyListExpandedRow,
@@ -39,6 +39,10 @@ import {
 import { Types } from '@ohif/ui';
 
 import { preserveQueryParameters, preserveQueryStrings } from '../../utils/preserveQueryParameters';
+import filesToStudies from '../Local/filesToStudies';
+import { extensionManager } from '../../App';
+import { toast } from '@ohif/ui-next';
+
 
 const PatientInfoVisibility = Types.PatientInfoVisibility;
 
@@ -60,6 +64,9 @@ function WorkList({
   onRefresh,
   servicesManager,
 }: withAppTypes) {
+  const fileInputRef = React.useRef();
+  const folderInputRef = React.useRef();
+
   const { show, hide } = useModal();
   const { t } = useTranslation();
   // ~ Modes
@@ -322,7 +329,7 @@ function WorkList({
         {
           key: 'description',
           content: makeCopyTooltipCell(description),
-          gridCol: 4,
+          gridCol: 3,
         },
         {
           key: 'modality',
@@ -335,22 +342,24 @@ function WorkList({
           content: makeCopyTooltipCell(accession),
           gridCol: 3,
         },
-        {
-          key: 'instances',
-          content: (
-            <>
-              <Icons.GroupLayers
-                className={classnames('mr-2 inline-flex w-4', {
-                  'text-primary': isExpanded,
-                  'text-secondary-light': !isExpanded,
-                })}
-              />
-              {instances}
-            </>
-          ),
-          title: (instances || 0).toString(),
-          gridCol: 2,
-        },
+        // {
+        //   key: 'triageStatus',
+        //   content: (
+        //     <span className="rounded bg-red-700 px-2 py-0.5 text-xs font-semibold text-white">HIGH</span>
+        //   ),
+        //   title: 'HIGH',
+        //   gridCol: 1,
+        //   noTruncate: true,
+        // },
+        // {
+        //   key: 'progression',
+        //   content: (
+        //     <span className="rounded bg-green-700 px-2 py-0.5 text-xs font-semibold text-white">Completed</span>
+        //   ),
+        //   title: 'Completed',
+        //   gridCol: 2,
+        //   noTruncate: true,
+        // },
       ],
       // Todo: This is actually running for all rows, even if they are
       // not clicked on.
@@ -358,102 +367,80 @@ function WorkList({
         <StudyListExpandedRow
           seriesTableColumns={{
             description: t('StudyList:Description'),
-            seriesNumber: t('StudyList:Series'),
             modality: t('StudyList:Modality'),
-            instances: t('StudyList:Instances'),
+            // triageStatus: t('StudyList:TriageStatus'),
+            // progression: t('StudyList:Progression'),
           }}
           seriesTableDataSource={
             seriesInStudiesMap.has(studyInstanceUid)
               ? seriesInStudiesMap.get(studyInstanceUid).map(s => {
                   return {
                     description: s.description || '(empty)',
-                    seriesNumber: s.seriesNumber ?? '',
                     modality: s.modality || '',
-                    instances: s.numSeriesInstances || '',
+                    // triageStatus: 'HIGH',
+                    // progression: 'Completed',
                   };
                 })
               : []
           }
         >
           <div className="flex flex-row gap-2">
-            {(appConfig.groupEnabledModesFirst
-              ? appConfig.loadedModes.sort((a, b) => {
-                  const isValidA = a.isValidMode({
-                    modalities: modalities.replaceAll('/', '\\'),
-                    study,
-                  }).valid;
-                  const isValidB = b.isValidMode({
-                    modalities: modalities.replaceAll('/', '\\'),
-                    study,
-                  }).valid;
+            {appConfig.loadedModes
+              .filter(mode => mode.displayName === 'Basic Viewer')
+              .map((mode, i) => {
+                const modalitiesToCheck = modalities.replaceAll('/', '\\');
 
-                  return isValidB - isValidA;
-                })
-              : appConfig.loadedModes
-            ).map((mode, i) => {
-              const modalitiesToCheck = modalities.replaceAll('/', '\\');
+                const { valid: isValidMode, description: invalidModeDescription } = mode.isValidMode({
+                  modalities: modalitiesToCheck,
+                  study,
+                });
+                const query = new URLSearchParams();
+                if (filterValues.configUrl) {
+                  query.append('configUrl', filterValues.configUrl);
+                }
+                query.append('StudyInstanceUIDs', studyInstanceUid);
+                preserveQueryParameters(query);
 
-              const { valid: isValidMode, description: invalidModeDescription } = mode.isValidMode({
-                modalities: modalitiesToCheck,
-                study,
-              });
-              // TODO: Modes need a default/target route? We mostly support a single one for now.
-              // We should also be using the route path, but currently are not
-              // mode.routeName
-              // mode.routes[x].path
-              // Don't specify default data source, and it should just be picked up... (this may not currently be the case)
-              // How do we know which params to pass? Today, it's just StudyInstanceUIDs and configUrl if exists
-              const query = new URLSearchParams();
-              if (filterValues.configUrl) {
-                query.append('configUrl', filterValues.configUrl);
-              }
-              query.append('StudyInstanceUIDs', studyInstanceUid);
-              preserveQueryParameters(query);
-
-              return (
-                mode.displayName && (
-                  <Link
-                    className={isValidMode ? '' : 'cursor-not-allowed'}
-                    key={i}
-                    to={`${mode.routeName}${dataPath || ''}?${query.toString()}`}
-                    onClick={event => {
-                      // In case any event bubbles up for an invalid mode, prevent the navigation.
-                      // For example, the event bubbles up when the icon embedded in the disabled button is clicked.
-                      if (!isValidMode) {
-                        event.preventDefault();
-                      }
-                    }}
-                    // to={`${mode.routeName}/dicomweb?StudyInstanceUIDs=${studyInstanceUid}`}
-                  >
-                    {/* TODO revisit the completely rounded style of buttons used for launching a mode from the worklist later */}
-                    <Button
-                      type={ButtonEnums.type.primary}
-                      size={ButtonEnums.size.medium}
-                      disabled={!isValidMode}
-                      startIconTooltip={
-                        !isValidMode ? (
-                          <div className="font-inter flex w-[206px] whitespace-normal text-left text-xs font-normal text-white">
-                            {invalidModeDescription}
-                          </div>
-                        ) : null
-                      }
-                      startIcon={
-                        isValidMode ? (
-                          <Icons.LaunchArrow className="!h-[20px] !w-[20px] text-black" />
-                        ) : (
-                          <Icons.LaunchInfo className="!h-[20px] !w-[20px] text-black" />
-                        )
-                      }
-                      onClick={() => {}}
-                      dataCY={`mode-${mode.routeName}-${studyInstanceUid}`}
-                      className={isValidMode ? 'text-[13px]' : 'bg-[#222d44] text-[13px]'}
+                return (
+                  mode.displayName && (
+                    <Link
+                      className={isValidMode ? '' : 'cursor-not-allowed'}
+                      key={i}
+                      to={`${mode.routeName}${dataPath || ''}?${query.toString()}`}
+                      onClick={event => {
+                        if (!isValidMode) {
+                          event.preventDefault();
+                        }
+                      }}
                     >
-                      {mode.displayName}
-                    </Button>
-                  </Link>
-                )
-              );
-            })}
+                      <Button
+                        type={ButtonEnums.type.primary}
+                        size={ButtonEnums.size.medium}
+                        disabled={!isValidMode}
+                        startIconTooltip={
+                          !isValidMode ? (
+                            <div className="font-inter flex w-[206px] whitespace-normal text-left text-xs font-normal text-white">
+                              {invalidModeDescription}
+                            </div>
+                          ) : null
+                        }
+                        startIcon={
+                          isValidMode ? (
+                            <Icons.LaunchArrow className="!h-[20px] !w-[20px] text-black" />
+                          ) : (
+                            <Icons.LaunchInfo className="!h-[20px] !w-[20px] text-black" />
+                          )
+                        }
+                        onClick={() => {}}
+                        dataCY={`mode-${mode.routeName}-${studyInstanceUid}`}
+                        className={isValidMode ? 'text-[13px]' : 'bg-[#222d44] text-[13px]'}
+                      >
+                        {mode.displayName}
+                      </Button>
+                    </Link>
+                  )
+                );
+              })}
           </div>
         </StudyListExpandedRow>
       ),
@@ -472,29 +459,7 @@ function WorkList({
     'ohif.userPreferencesModal'
   ) as coreTypes.MenuComponentCustomization;
 
-  const menuOptions = [
-    {
-      title: AboutModal?.menuTitle ?? t('Header:About'),
-      icon: 'info',
-      onClick: () =>
-        show({
-          content: AboutModal,
-          title: AboutModal?.title ?? t('AboutModal:About OHIF Viewer'),
-          containerClassName: AboutModal?.containerClassName ?? 'max-w-md',
-        }),
-    },
-    {
-      title: UserPreferencesModal.menuTitle ?? t('Header:Preferences'),
-      icon: 'settings',
-      onClick: () =>
-        show({
-          content: UserPreferencesModal as React.ComponentType,
-          title: UserPreferencesModal.title ?? t('UserPreferencesModal:User preferences'),
-          containerClassName:
-            UserPreferencesModal?.containerClassName ?? 'flex max-w-4xl p-6 flex-col',
-        }),
-    },
-  ];
+  const menuOptions = [];
 
   if (appConfig.oidc) {
     menuOptions.push({
@@ -541,6 +506,47 @@ function WorkList({
     'ohif.dataSourceConfigurationComponent'
   );
 
+  const [dropInitiated, setDropInitiated] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const onDrop = async acceptedFiles => {
+    setDropInitiated(true);
+    setLoading(true);
+
+    // local data source bul
+    const dataSourceModules = extensionManager.modules[MODULE_TYPES.DATA_SOURCE];
+    const localDataSources = dataSourceModules.reduce((acc, curr) => {
+      const mods = [];
+      curr.module.forEach(mod => {
+        if (mod.type === 'localApi') {
+          mods.push(mod);
+        }
+      });
+      return acc.concat(mods);
+    }, []);
+    const firstLocalDataSource = localDataSources[0];
+    const dataSourceLocal = firstLocalDataSource.createDataSource({});
+    const studies = await filesToStudies(acceptedFiles);
+    const query = new URLSearchParams();
+    studies.forEach(id => query.append('StudyInstanceUIDs', id));
+    query.append('datasources', 'dicomlocal');
+    navigate(`/?${decodeURIComponent(query.toString())}`);
+
+    // DICOM4CHEE'ye otomatik gönderim
+    const dicomwebDataSource = extensionManager.getDataSources('dicomweb')[0];
+    for (const file of acceptedFiles) {
+      try {
+        await dicomwebDataSource.store.dicom(file);
+        toast.success(`${file.name} başarıyla DICOM4CHEE'ye yüklendi`);
+      } catch (err) {
+        toast.error(`${file.name} yüklenirken hata oluştu`);
+      }
+    }
+
+    setLoading(false);
+    setDropInitiated(false);
+  };
+
   return (
     <div className="flex h-screen flex-col bg-black">
       <Header
@@ -550,7 +556,51 @@ function WorkList({
         WhiteLabeling={appConfig.whiteLabeling}
         showPatientInfo={PatientInfoVisibility.DISABLED}
       />
+      <div className="flex flex-row justify-center gap-4 py-4 bg-black">
+        {loading && <span className="text-white ml-4">Yükleniyor...</span>}
+      </div>
       <Onboarding />
+      {/* Load File(s) ve Load Folder butonları */}
+      <div className="flex flex-row justify-center gap-4 py-4 bg-black">
+        <Button
+          type={ButtonEnums.type.primary}
+          onClick={() => fileInputRef.current.click()}
+          className="text-[13px]"
+        >
+          Load File(s)
+        </Button>
+        <Button
+          type={ButtonEnums.type.primary}
+          onClick={() => folderInputRef.current.click()}
+          className="text-[13px]"
+        >
+          Load Folder
+        </Button>
+        {loading && <span className="text-white ml-4">Yükleniyor...</span>}
+
+        <input
+          ref={fileInputRef}
+          type="file"
+          multiple
+          hidden
+          onChange={e => {
+            const files = Array.from(e.target.files);
+            onDrop(files);
+          }}
+        />
+        <input
+          ref={folderInputRef}
+          type="file"
+          multiple
+          webkitdirectory="true"
+          directory=""
+          hidden
+          onChange={e => {
+            const files = Array.from(e.target.files);
+            onDrop(files);
+          }}
+        />
+      </div>
       <InvestigationalUseDialog dialogConfiguration={appConfig?.investigationalUseDialog} />
       <div className="flex h-full flex-col overflow-y-auto">
         <ScrollArea>

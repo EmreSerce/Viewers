@@ -44,12 +44,13 @@ const StudyListTableRow = props => {
                   data-cy={clickableCY}
                 >
                   {row.map((cell, index) => {
-                    const { content, title, gridCol } = cell;
+                    const { content, title, gridCol, noTruncate } = cell;
                     return (
                       <td
                         key={index}
                         className={classnames(
-                          'truncate px-4 py-2 text-base',
+                          'px-4 py-2 text-base',
+                          { truncate: !noTruncate },
                           { 'border-secondary-light border-b': !isExpanded },
                           getGridWidthClass(gridCol) || ''
                         )}
@@ -69,7 +70,10 @@ const StudyListTableRow = props => {
                             </div>
                           )}
                           <div
-                            className={classnames({ 'overflow-hidden': true }, { truncate: true })}
+                            className={classnames(
+                              { 'overflow-hidden': !noTruncate },
+                              { truncate: !noTruncate }
+                            )}
                           >
                             {content}
                           </div>

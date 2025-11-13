@@ -27,7 +27,7 @@ const filtersMeta = [
     displayName: i18n.t('StudyList:Description'),
     inputType: 'Text',
     isSortable: true,
-    gridCol: 4,
+    gridCol: 3,
   },
   {
     name: 'modalities',
@@ -118,8 +118,15 @@ const filtersMeta = [
     gridCol: 3,
   },
   {
-    name: 'instances',
-    displayName: i18n.t('StudyList:Instances'),
+    name: 'triageStatus',
+    displayName: '',
+    inputType: 'None',
+    isSortable: false,
+    gridCol: 1,
+  },
+  {
+    name: 'progression',
+    displayName: '',
     inputType: 'None',
     isSortable: false,
     gridCol: 2,

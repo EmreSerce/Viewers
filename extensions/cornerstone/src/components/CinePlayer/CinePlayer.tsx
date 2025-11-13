@@ -160,7 +160,7 @@ function RenderCinePlayer({
   dynamicInfo: dynamicInfoProp,
   customizationService,
 }) {
-  const CinePlayerComponent = customizationService.getCustomization('cinePlayer');
+  // const CinePlayerComponent = customizationService.getCustomization('cinePlayer');
 
   const [dynamicInfo, setDynamicInfo] = useState(dynamicInfoProp);
 
@@ -212,36 +212,36 @@ function RenderCinePlayer({
     volume.dimensionGroupNumber = dimensionGroupNumber;
   }, []);
 
-  return (
-    <CinePlayerComponent
-      className="absolute left-1/2 bottom-3 -translate-x-1/2"
-      frameRate={newStackFrameRate}
-      isPlaying={isPlaying}
-      onClose={() => {
-        // also stop the clip
-        cineService.setCine({
-          id: viewportId,
-          isPlaying: false,
-        });
-        cineService.setIsCineEnabled(false);
-        cineService.setViewportCineClosed(viewportId);
-      }}
-      onPlayPauseChange={isPlaying => {
-        cineService.setCine({
-          id: viewportId,
-          isPlaying,
-        });
-      }}
-      onFrameRateChange={frameRate =>
-        cineService.setCine({
-          id: viewportId,
-          frameRate,
-        })
-      }
-      dynamicInfo={dynamicInfo}
-      updateDynamicInfo={updateDynamicInfo}
-    />
-  );
+  // return (
+  //   <CinePlayerComponent
+  //     className="absolute left-1/2 bottom-3 -translate-x-1/2"
+  //     frameRate={newStackFrameRate}
+  //     isPlaying={isPlaying}
+  //     onClose={() => {
+  //       // also stop the clip
+  //       cineService.setCine({
+  //         id: viewportId,
+  //         isPlaying: false,
+  //       });
+  //       cineService.setIsCineEnabled(false);
+  //       cineService.setViewportCineClosed(viewportId);
+  //     }}
+  //     onPlayPauseChange={isPlaying => {
+  //       cineService.setCine({
+  //         id: viewportId,
+  //         isPlaying,
+  //       });
+  //     }}
+  //     onFrameRateChange={frameRate =>
+  //       cineService.setCine({
+  //         id: viewportId,
+  //         frameRate,
+  //       })
+  //     }
+  //     dynamicInfo={dynamicInfo}
+  //     updateDynamicInfo={updateDynamicInfo}
+  //   />
+  // );
 }
 
 export default WrappedCinePlayer;

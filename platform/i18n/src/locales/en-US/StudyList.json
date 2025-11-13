@@ -6,6 +6,8 @@
   "Filter list to 100 studies or less to enable sorting": "Filter the list to 100 studies or less to enable sorting",
   "Instances": "Instances",
   "Modality": "Modality",
+  "TriageStatus": "Triage status",
+  "Progression": "Progression",
   "MRN": "MRN",
   "Next": "Next >",
   "No studies available": "No studies available",
@@ -16,5 +18,7 @@
   "Results per page": "Results per page",
   "StudyDate": "Study Date",
   "StudyList": "Study List",
-  "Upload": "Upload"
+  "Upload": "Upload",
+  "Load File": "Load File(s)",
+  "Load Folder": "Load Folder"
 }
